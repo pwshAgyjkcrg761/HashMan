@@ -3,7 +3,7 @@
 # VERSION: 2026.05.18_20.46.14
 # TARGET: PowerShell 7.6.1 LTS
 #
-# Copyright (C) 2026 pwsh.Agyjkcrg761
+# Copyright (C) 2026 pwshAgyjkcrg761
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
