@@ -1,7 +1,7 @@
 # ==============================================================================
 # SCRIPT: HashMan.ps1
-# VERSION: 2026.05.18_20.46.14
-# TARGET: PowerShell 7.6.1 LTS
+# VERSION: 2026.06.18__07.53.15
+# TARGET: PowerShell 7.6.2 LTS
 #
 # Copyright (C) 2026 pwshAgyjkcrg761
 # 
@@ -12,21 +12,35 @@
 # ==============================================================================
 # <PROTECTED>
 # ==============================================================================
-# AI INSTRUCTIONS: 
+# AI INSTRUCTIONS v2026.06.13__13.53.01 : 
 # 1. HEADER: Update Version comment.
-#    - VERSIONING: Update using CHICAGO TIME (Central Time). 
+#    - VERSIONING: Update using CHICAGO TIME (Central Time), 24 hour clock.
+#    - OUTPUT: When printing the updated version, only provide the new version
+#      number. Do not describe the change as complex or explain the edit.
 #    - CRITICAL: Do not use AI system time. Use the time provided in the most 
 #      recent user prompt or link (Ref: https://www.timeanddate.com/worldclock/usa/chicago).
 #    - STAMP ACCURACY: Ensure the minutes match the current Chicago clock exactly.
 # 2. DO NOT modify or refactor any code inside <PROTECTED> tags.
-# 3. SCRIPT OUTPUT:
-#    - When printing the script only print snippets unless asked for entire script.
+# 3. SCRIPT OUTPUT (SURGICAL FIXES ONLY):
+#    - Provide minimal, highly targeted, surgical edits. Do not rewrite large blocks or entire functions unless explicitly requested.
+#    - When printing the script, only print snippets unless asked for the entire script.
 #    - Always use a codebox with a copy button.
+#    - If there are multiple modifications, present them strictly ONE step at a time,
+#      and wait for user confirmation before proceeding to the next step.
+#
 # 4. VERBATIM ANCHOR PROTOCOL:
-#    - To facilitate "Find" in Notepad++, always provide "Verbatim Anchors."
-#    - "Verbatim Anchors" are the exact lines of existing code immediately BEFORE and AFTER the insertion point.
-#    - Do not summarize, truncate, or refactor the existing code used as an anchor.
-#    - Copy the existing spaces, comments, and symbols exactly as they appear in the file.
+#    - To facilitate "Find" in Notepad++ always structure edits with:
+#     - "Verbatim Anchor (Before)" - The exact lines of existing code immediately before the change.
+#     - "Verbatim Anchor (After)" - The exact lines of existing code immediately after the change.
+#     - "Snippet to REPLACE" - The exact code block to be deleted.
+#     - "What to PASTE in its place" - The new code block to be inserted.
+#   - Do not summarize, truncate, or refactor the existing code used as an anchor.
+#   - Copy spaces, comments, and symbols exactly as they appear in the file.
+#   - Keep anchors and replacement snippets as small and precise as possible to isolate only the necessary change.
+#
+# 5. CONTENT PRESERVATION:
+#    - Do not remove, modify, or strip out telemetry data or DevDebug information 
+#      from any provided code.
 # ==============================================================================
 # </PROTECTED>
 
@@ -41,7 +55,7 @@ try { Add-Type -AssemblyName System.Windows.Forms } catch { }
 $OutputEncoding = [System.Text.Encoding]::UTF8
 $ClearLine = [char]27 + "[K" 
 $HomeCursor = [char]27 + "[H"
-$Global:Ver = "v2026.05.18_20.46.14"
+$Global:Ver = "v2026.06.18__07.53.15"
 
 # -------------------------------------------------------------------------
 # CONFIGURATION & STATE FILES
@@ -202,7 +216,7 @@ function Get-BlackSelection {
     param($Items, $Title, $StartingIndex = 0, $Notification = "", $IsDrillView = $false, $HashPath = "")
     $filter = ""; 
     $cursor = $StartingIndex; 
-    $pageSize = [Console]::WindowHeight - 19
+    $pageSize = [Console]::WindowHeight - 17
     $statusMsg = $Notification; 
     $statusExpiry = if ($Notification) { (Get-Date).AddSeconds(3) } else { [DateTime]::MinValue }
     $anchorSig = $null 
