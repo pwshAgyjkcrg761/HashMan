@@ -63,6 +63,7 @@ Standard keyboard shortcuts handle directory expansion and target selections wit
 ---
 
 ## Dependencies
+* **PowerShell:** Built with PowerShell 7.6.x.
 * **<a href="https://corz.org/windows/software/checksum/" target="_blank" rel="noopener noreferrer">Corz Checksum</a>** Required for verification tasks. Must be installed to `C:\Program Files\corz\checksum\checksum.exe`.
 
 ## Support & Maintenance
