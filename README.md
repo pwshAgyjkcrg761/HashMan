@@ -63,7 +63,7 @@ Standard keyboard shortcuts handle directory expansion and target selections wit
 ---
 
 ## Dependencies
-* **corz checksum:** Required for verification tasks. Must be installed to `C:\Program Files\corz\checksum\checksum.exe`.
+* **<a href="https://corz.org/windows/software/checksum/" target="_blank" rel="noopener noreferrer">Corz Checksum</a>** Required for verification tasks. Must be installed to `C:\Program Files\corz\checksum\checksum.exe`.
 
 ## Support & Maintenance
 **This repository is provided "as-is" for archival purposes.** The author is not actively looking for feedback, feature requests, or bug reports. The issue tracker is disabled, and the author will not be responding to inquiries regarding setup or usage.
