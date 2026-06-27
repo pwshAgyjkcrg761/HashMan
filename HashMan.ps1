@@ -1,6 +1,6 @@
 # ==============================================================================
 # SCRIPT: HashMan.ps1
-# VERSION: 2026.06.25__15.33.12
+# VERSION: 2026.06.27__06.58.19
 # TARGET: PowerShell 7.6.3 LTS
 #
 # Copyright (C) 2026 pwshAgyjkcrg761
@@ -54,7 +54,7 @@ param(
 )
 
 # --- GLOBAL VERSION DEFINITION ---
-$scriptVersion = "2026.06.25__15.33.12"
+$scriptVersion = "2026.06.27__06.58.19"
 
 # -------------------------------------------------------------------------
 # DEPENDENCIES & ENFORCEMENT
@@ -225,6 +225,7 @@ function Show-HashManManual {
     "  multi-item range selection within hash containers.`n" | ForEach-Object { Write-Host $_ -ForegroundColor DarkMagenta }
     
     Write-Host " DEPENDENCIES:" -ForegroundColor DarkYellow
+    "  • PowerShell: Built with PowerShell 7.6.x.",
     "  • corz checksum: Required for verification tasks. Must be installed", 
     "    to C:\Program Files\corz\checksum\checksum.exe`n" | ForEach-Object { Write-Host $_ -ForegroundColor DarkGray }
     
