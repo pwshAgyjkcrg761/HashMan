@@ -73,6 +73,6 @@ Standard keyboard shortcuts handle directory expansion and target selections wit
 *This script executes deletion and validation operations on hash containers using external tools. While designed for structural safety, always ensure you have backups of your media before running batch operations across your storage volumes.*
 
 ---
-> **Document Control**
-> *This document is up-to-date with the following version of HashMan.*
-> *2026.06.25__15.33.12*
+> **Document Control**<br>
+> *This document is up-to-date with the following version of HashMan.*<br>
+> *2026.07.02__14.27.13*
