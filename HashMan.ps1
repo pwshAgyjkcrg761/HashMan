@@ -1,6 +1,6 @@
 # ==============================================================================
 # SCRIPT: HashMan.ps1
-# VERSION: 2026.07.02__14.27.13
+# VERSION: 2026.09.08__14.56.02
 # TARGET: PowerShell 7.6.3 LTS
 #
 # Copyright (C) 2026 pwshAgyjkcrg761
@@ -20,35 +20,47 @@
 # ==============================================================================
 # <PROTECTED>
 # ==============================================================================
-# AI INSTRUCTIONS v2026.06.24__06.54.45 : 
+# AI INSTRUCTIONS
+# Copyright (c) 2026 pwshAgyjkcrg761
+# License: MIT
+# Source: https://git.disroot.org/pwshAgyjkcrg761/AI_Instructions
+#
+# AI INSTRUCTIONS v2026.09.01__04.25.09 : 
 #
 # 1. MESSAGE STAMP: 
 #    - Every response containing code MUST begin with a standalone version stamp.
 #    - Use CHICAGO TIME (Central Time), 24-hour clock.
 #    - Format: YYYY.MM.DD__HH.MM.SS.
-#    - CRITICAL: Use the time provided in the prompt or at https://www.timeanddate.com/worldclock/usa/chicago. Ensure minutes are exact.
+#    - CRITICAL: Use the time provided in the prompt or at 
+#      https://www.timeanddate.com/worldclock/usa/chicago. Ensure minutes are exact.
 #
 # 2. VERSION SNIPPET PROHIBITION:
-#    - DO NOT provide code snippets, anchors, or steps to update the script's internal VERSION comment or $scriptVersion variable. 
+#    - DO NOT provide code snippets, anchors, or steps to update the script's 
+#      internal VERSION comment or $scriptVersion variable. 
 #    - The user handles internal file versioning manually based on the Message Stamp.
 #
 # 3. SCRIPT OUTPUT (SURGICAL FIXES ONLY):
-#    - Provide minimal, highly targeted, surgical edits. Do not rewrite large blocks or entire functions.
+#    - Provide minimal, highly targeted, surgical edits. Do not rewrite large blocks or 
+#      entire functions.
 #    - Always use a codebox with a copy button.
-#    - Multiple modifications MUST be presented strictly ONE step at a time. Wait for user confirmation before proceeding to the next step. 
+#    - Multiple modifications MUST be presented strictly ONE step at a time. Wait for 
+#      user confirmation before proceeding to the next step. 
 #    - DO NOT modify or refactor any code inside <PROTECTED> tags.
 #
 # 4. VERBATIM ANCHOR PROTOCOL (FOR NOTEPAD++):
 #    - To facilitate "Find" in Notepad++, always structure edits with:
-#      - "Verbatim Anchor (Before)" - The exact lines of existing code immediately before the change.
-#      - "Verbatim Anchor (After)" - The exact lines of existing code immediately after the change.
+#      - "Verbatim Anchor (Before)" - The exact lines of existing code immediately before 
+#         the change.
+#      - "Verbatim Anchor (After)" - The exact lines of existing code immediately after 
+#         the change.
 #      - "Snippet to REPLACE" - The exact code block to be deleted.
 #      - "What to PASTE in its place" - The new code block to be inserted.
 #    - Do not summarize, truncate, or refactor the existing code used as an anchor.
 #    - Match spaces, comments, and symbols exactly as they appear in the file.
 #
 # 5. CONTENT PRESERVATION:
-#    - Do not remove, modify, or strip out telemetry data or DevDebug information from any provided code.
+#    - Do not remove, modify, or strip out telemetry data or DevDebug information from any 
+#      provided code.
 # ==============================================================================
 # </PROTECTED>
 
@@ -62,7 +74,7 @@ param(
 )
 
 # --- GLOBAL VERSION DEFINITION ---
-$scriptVersion = "2026.07.02__14.27.13"
+$scriptVersion = "2026.09.08__14.56.02"
 
 # -------------------------------------------------------------------------
 # DEPENDENCIES & ENFORCEMENT
@@ -78,7 +90,45 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 $ClearLine = [char]27 + "[K" 
 $HomeCursor = [char]27 + "[H"
 function Get-DependencyPaths {
-    return @{ corz = "C:\Program Files\corz\checksum\checksum.exe" }
+    # 1. Discover Python Interpreter
+    $py = (Get-Command python.exe -ErrorAction SilentlyContinue).Source
+    if (-not $py) { $py = (Get-Command python -ErrorAction SilentlyContinue).Source }
+
+    # 2. Discover KryptDist.py (PATH -> C:\scripts\KryptDist.py -> Script Directory)
+    $kdPath = ""
+    $kdInPath = (Get-Command KryptDist.py -ErrorAction SilentlyContinue).Source
+    if ($kdInPath -and (Test-Path -LiteralPath $kdInPath)) {
+        $kdPath = $kdInPath
+    } elseif (Test-Path -LiteralPath "C:\scripts\KryptDist.py") {
+        $kdPath = "C:\scripts\KryptDist.py"
+    } elseif (Test-Path -LiteralPath (Join-Path $PSScriptRoot "KryptDist.py")) {
+        $kdPath = Join-Path $PSScriptRoot "KryptDist.py"
+    }
+
+    # 3. Discover Corz checksum.exe (Fallback)
+    $corzCandidate = "C:\Program Files\corz\checksum\checksum.exe"
+    $corzPath = ""
+    if (Test-Path -LiteralPath $corzCandidate) {
+        $corzPath = $corzCandidate
+    } else {
+        $corzInPath = (Get-Command checksum.exe -ErrorAction SilentlyContinue).Source
+        if ($corzInPath -and (Test-Path -LiteralPath $corzInPath)) { $corzPath = $corzInPath }
+    }
+
+    # Determine active engine: Preferred KryptDist, Fallback Corz
+    $engine = $null
+    if ($py -and $kdPath) {
+        $engine = "KryptDist"
+    } elseif ($corzPath) {
+        $engine = "Corz"
+    }
+
+    return @{ 
+        Engine    = $engine
+        Python    = $py
+        KryptDist = $kdPath
+        Corz      = $corzPath
+    }
 }
 # -------------------------------------------------------------------------
 # CONFIGURATION & STATE FILES
@@ -103,27 +153,31 @@ if (Test-Path $settingsFile) {
 
 # --- DEPENDENCY CHECK ---
 $tools = Get-DependencyPaths
-$corzPath = $tools.corz
-$flags = "v2sqi"
+$activeEngine = $tools.Engine
+$pythonPath = $tools.Python
+$kryptDistPath = $tools.KryptDist
+$corzPath = $tools.Corz
+$corzFlags = "v2sqi"
 
 $missingTools = New-Object System.Collections.Generic.List[string]
-if ([string]::IsNullOrWhiteSpace($corzPath) -or -not (Test-Path -LiteralPath $corzPath)) { 
-    [void]$missingTools.Add("checksum.exe (corz checksum)") 
+if (-not $activeEngine) {
+    [void]$missingTools.Add("KryptDist.py (in PATH or C:\scripts\KryptDist.py) OR checksum.exe (corz checksum)")
 }
 
 if ($missingTools.Count -gt 0) {
-    Write-Host "`n [!] ERROR: The following dependencies are missing:" -ForegroundColor DarkRed
+    Write-Host "`n [!] ERROR: No valid hashing engine discovered:" -ForegroundColor DarkRed
     $missingTools | ForEach-Object { Write-Host "     -> $_" -ForegroundColor DarkYellow }
     
-    Write-Host "`n [TIP] If you recently installed corz checksum or modified your System PATH," -ForegroundColor Cyan
-    Write-Host "       please reboot your computer to ensure the changes are applied." -ForegroundColor Cyan
-    Write-Host "`n Please install corz checksum to proceed." -ForegroundColor Gray
+    Write-Host "`n [TIP] Please ensure either KryptDist.py + Python or corz checksum is installed." -ForegroundColor Cyan
     Read-Host "Press Enter to exit"; exit
 }
 
 if ($DevDebug) {
     Write-Host "`n [DevDebug-Main] Tool Discovery:" -ForegroundColor DarkYellow
-    Write-Host "  -> corz:        $corzPath`n" -ForegroundColor Gray
+    Write-Host "  -> Active Engine: $activeEngine" -ForegroundColor Cyan
+    Write-Host "  -> Python:        $pythonPath" -ForegroundColor Gray
+    Write-Host "  -> KryptDist:     $kryptDistPath" -ForegroundColor Gray
+    Write-Host "  -> Corz:          $corzPath`n" -ForegroundColor Gray
     Start-Sleep -Seconds 2
 } 
 
@@ -227,15 +281,17 @@ function Show-HashManManual {
     Write-Host "`n OVERVIEW:" -ForegroundColor DarkYellow
     "  A high-speed TUI (Terminal User Interface) for managing .hash files.",
     "  Navigate complex directory structures, queue file verifications via",
-    "  corz checksum, and perform surgical line-item or full-file deletions.",
+    "  KryptDist (or corz checksum fallback), and perform surgical line-item",
+    "  or full-file deletions.",
     "",
     "  The interface supports tree-view navigation, global searching, and",
     "  multi-item range selection within hash containers.`n" | ForEach-Object { Write-Host $_ -ForegroundColor DarkMagenta }
     
     Write-Host " DEPENDENCIES:" -ForegroundColor DarkYellow
     "  • PowerShell: Built with PowerShell 7.6.x.",
-    "  • corz checksum: Required for verification tasks. Must be installed", 
-    "    to C:\Program Files\corz\checksum\checksum.exe`n" | ForEach-Object { Write-Host $_ -ForegroundColor DarkGray }
+    "  • Python & KryptDist.py: Primary engine. Discovered in PATH,",
+    "    C:\scripts\KryptDist.py, or the script directory.",
+    "  • corz checksum: Fallback engine if Python/KryptDist is not found.`n" | ForEach-Object { Write-Host $_ -ForegroundColor DarkGray }
     
     Write-Host "`n NAVIGATION & CONTROLS:`n" -ForegroundColor DarkYellow
 
@@ -732,18 +788,22 @@ try {
         if ($res.Action -eq "RUN_VERIFY") {
             if ($GlobalVerifyQueue.Count -eq 0) { $statusNotification = "VERIFY QUEUE IS EMPTY."; continue }
             if ($DevDebug) { 
-                Write-Host "[DevDebug-Verify] Payload: $($GlobalVerifyQueue.Count) items in dictionary queue." -ForegroundColor DarkYellow
+                Write-Host "[DevDebug-Verify] Payload: $($GlobalVerifyQueue.Count) items in dictionary queue. Engine: $activeEngine" -ForegroundColor DarkYellow
                 Read-Host "Press Enter to execute verify..."
             }
-            [Console]::Clear(); [Console]::SetCursorPosition(0,0); Write-Host "Verifying...`n" -ForegroundColor DarkCyan
+            [Console]::Clear(); [Console]::SetCursorPosition(0,0); Write-Host "Verifying using $activeEngine...`n" -ForegroundColor DarkCyan
             foreach ($item in $GlobalVerifyQueue.Values) {
                 if ($item.IsFile) {
                     Write-Host "HASH CONTAINER: $($item.FileName)" -ForegroundColor Gray
                     $internalFiles = Get-HashEntries -hashFile $item
                     foreach ($entry in $internalFiles) {
                         Write-Host "  [WAIT] $($entry.FileName)" -NoNewline
-                        if ($DevDebug) { Write-Host "`n[DevDebug-Verify] CMD: $corzPath | ARGS: $flags `"$($entry.FileName)`" | DIR: $($entry.ParentDir)" -ForegroundColor DarkMagenta }
-                        $psi = New-Object System.Diagnostics.ProcessStartInfo -Property @{ FileName = $corzPath; WorkingDirectory = $entry.ParentDir; Arguments = "$flags `"$($entry.FileName)`""; CreateNoWindow = $true; UseShellExecute = $false }
+                        
+                        $execCmd = if ($activeEngine -eq "KryptDist") { $pythonPath } else { $corzPath }
+                        $execArgs = if ($activeEngine -eq "KryptDist") { "`"$kryptDistPath`" -v `"$($entry.FileName)`"" } else { "$corzFlags `"$($entry.FileName)`"" }
+                        
+                        if ($DevDebug) { Write-Host "`n[DevDebug-Verify] CMD: $execCmd | ARGS: $execArgs | DIR: $($entry.ParentDir)" -ForegroundColor DarkMagenta }
+                        $psi = New-Object System.Diagnostics.ProcessStartInfo -Property @{ FileName = $execCmd; WorkingDirectory = $entry.ParentDir; Arguments = $execArgs; CreateNoWindow = $true; UseShellExecute = $false }
                         $proc = [System.Diagnostics.Process]::Start($psi); $proc.WaitForExit()
                         if ($proc.ExitCode -le 1) { Write-Host "`r  [ OK ] $($entry.FileName)$ClearLine" -ForegroundColor DarkGreen } 
                         else { 
@@ -754,8 +814,12 @@ try {
                     }
                 } else {
                     Write-Host "[WAIT] $($item.FileName)" -NoNewline
-                    if ($DevDebug) { Write-Host "`n[DevDebug-Verify] CMD: $corzPath | ARGS: $flags `"$($item.FileName)`" | DIR: $($item.ParentDir)" -ForegroundColor DarkMagenta }
-                    $psi = New-Object System.Diagnostics.ProcessStartInfo -Property @{ FileName = $corzPath; WorkingDirectory = $item.ParentDir; Arguments = "$flags `"$($item.FileName)`""; CreateNoWindow = $true; UseShellExecute = $false }
+                    
+                    $execCmd = if ($activeEngine -eq "KryptDist") { $pythonPath } else { $corzPath }
+                    $execArgs = if ($activeEngine -eq "KryptDist") { "`"$kryptDistPath`" -v `"$($item.FileName)`"" } else { "$corzFlags `"$($item.FileName)`"" }
+                    
+                    if ($DevDebug) { Write-Host "`n[DevDebug-Verify] CMD: $execCmd | ARGS: $execArgs | DIR: $($item.ParentDir)" -ForegroundColor DarkMagenta }
+                    $psi = New-Object System.Diagnostics.ProcessStartInfo -Property @{ FileName = $execCmd; WorkingDirectory = $item.ParentDir; Arguments = $execArgs; CreateNoWindow = $true; UseShellExecute = $false }
                     $proc = [System.Diagnostics.Process]::Start($psi); $proc.WaitForExit()
                     if ($proc.ExitCode -le 1) { Write-Host "`r[ OK ] $($item.FileName)$ClearLine" -ForegroundColor DarkGreen } 
                     else { 
