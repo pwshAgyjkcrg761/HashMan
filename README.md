@@ -76,4 +76,4 @@ Standard keyboard shortcuts handle directory expansion and target selections wit
 ---
 > **Document Control**<br>
 > *This document is up-to-date with the following version of HashMan.*<br>
-> *2026.07.02__14.27.13*
+> *2026.09.08__14.56.02*
