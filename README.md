@@ -4,7 +4,7 @@
 ---
 
 ## Overview
-`HashMan.ps1` is a high-speed TUI (Terminal User Interface) designed for managing `.hash` files. It allows users to seamlessly navigate complex directory structures, queue file verifications via corz checksum, and perform surgical line-item or full-file deletions.
+`HashMan.ps1` is a high-speed TUI (Terminal User Interface) designed for managing `.hash` files. It allows users to seamlessly navigate complex directory structures, queue file verifications via KryptDist (with automatic fallback to corz checksum), and perform surgical line-item or full-file deletions.
 
 ### Operational Modes
 The interface supports two primary layout views:
@@ -64,7 +64,8 @@ Standard keyboard shortcuts handle directory expansion and target selections wit
 
 ## Dependencies
 * **PowerShell:** Built with PowerShell 7.6.x.
-* **<a href="https://corz.org/windows/software/checksum/" target="_blank" rel="noopener noreferrer">Corz Checksum</a>** Required for verification tasks. Must be installed to `C:\Program Files\corz\checksum\checksum.exe`.
+* **Python 3.14.5+ & <a href="https://git.disroot.org/pwshAgyjkcrg761/KryptDist-py" target="_blank" rel="noopener noreferrer">KryptDist.py</a>:** Primary verification engine. Automatically discovered in System PATH, `C:\scripts\KryptDist.py`, or the local script directory.
+* **<a href="https://corz.org/windows/software/checksum/" target="_blank" rel="noopener noreferrer">Corz Checksum</a>:** Supported fallback verification engine (`C:\Program Files\corz\checksum\checksum.exe` or PATH) if Python / KryptDist is not installed.
 
 ## Support & Maintenance
 **This repository is provided "as-is" for archival purposes.** The author is not actively looking for feedback, feature requests, or bug reports. The issue tracker is disabled, and the author will not be responding to inquiries regarding setup or usage.
