@@ -3,6 +3,8 @@
 
 ---
 
+![HashMan Main Interface](images/HashMan-ps1_main.png)
+
 ## Overview
 `HashMan.ps1` is a high-speed TUI (Terminal User Interface) designed for managing `.hash` files. It allows users to seamlessly navigate complex directory structures, queue file verifications via KryptDist (with automatic fallback to corz checksum), and perform surgical line-item or full-file deletions.
 
