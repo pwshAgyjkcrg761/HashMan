@@ -1,0 +1,29 @@
+name: Mirror from Disroot
+
+on:
+  schedule:
+    - cron: '0 */6 * * *' # Runs every 6 hours
+  workflow_dispatch:      # Allows you to trigger it manually from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout GitHub repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.MIRROR_KEY }}
+
+      - name: Force Mirror from Disroot
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+          git remote add disroot https://git.disroot.org/pwshAgyjkcrg761/HashMan.git
+          git fetch disroot --tags --force
+          git checkout main
+          git reset --hard disroot/main
+          git push https://x-access-token:${{ secrets.MIRROR_KEY }}@github.com/pwshAgyjkcrg761/HashMan.git main --tags --force
